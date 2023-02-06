@@ -1,0 +1,242 @@
+<div class="container" style="text-align:center; margin-bottom: 60px; margin-top: 80px;">
+  <h1 style="padding:40px;">STOCK SEARCH</h1>
+  <form class="input-group searchbar" (ngSubmit)="onSearch()">
+    <input class="rounded-pill" type="search" placeholder="Enter stock ticker symbol..." id="search_value" [matAutocomplete]="auto" matInput [formControl]="searchControl">
+    <span class="input-group-append">
+         <div class="input-group-append search_buttons_grp" role="group" aria-label="Basic example" >
+          <button type="submit" class="btn search_button" (click)="onSearch()"><img class="search_image" style="width:16px; padding-bottom:4px;" src="/assets/search.svg"></button>
+          <button type="clear" class="btn search_button" (click)="onClear()"><img style="width:30px" src="/assets/x.svg"></button>
+        </div>
+     </span>
+  </form>
+</div>
+
+<div class="container">
+  <div [class]="soldorbought==' bought ' ? 'alert alert-success' : 'alert alert-danger'" role="alert" *ngIf="notification_present==true">
+    {{tick}} {{soldorbought}} sucessfully!
+    <button type="clear" class="btn search_button" (click)="this.notification_present = false;" style="float:right;margin-top: -10px;">
+      <img style="width:30px; float:right; filter: invert() brightness(.5)" src="/assets/x.svg">
+    </button>
+  </div>
+</div>
+
+<div class="container" style="padding-top:50px;" *ngIf="['summary', 'news', 'charts','insights'].includes(tab_if_condition)">
+  <div class="row">
+    <div class="col-md-4">
+      <div class="row">
+        <h2 class="col-sm-auto">{{tick}}</h2>
+        <img class="col-sm-auto wl_star_img" src="/assets/star.svg" (click)="changeWatchlistStatus()" *ngIf="tkr_on_watch == false">
+        <img class="col-sm-auto wl_star_img" src="/assets/star-fill.svg" (click)="changeWatchlistStatus()" *ngIf="tkr_on_watch == true">
+      </div>
+      <h3>{{comp_name}}</h3>
+      <h6>{{exchange}}</h6>
+      <p>
+        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#buyModal" style="margin-right:10px;" (click)="updateBuy()">Buy</button>
+        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#sellModal" *ngIf="if_sellable" (click)="updateSell()">Sell</button>
+      </p>
+    </div>
+    <div class="col-md-4" style="text-align:center;">
+      <img src="{{logo_image}}" style="height: 120px;width: 120px;">
+    </div>
+    <div class="col-md-4" style="text-align:right;">
+      <h2 style="color:{{change_color}}">{{close}}</h2>
+      <h3 style="color:{{change_color}}">
+        <img style="width:30px; filter: invert() sepia(100%) saturate(10000%) hue-rotate(45deg) saturate(10000%) brightness(.5)" src="/assets/caret-up-fill.svg" *ngIf="change_color == 'green'">
+        <img style="width:30px; filter: invert() sepia(100%) saturate(10000%) hue-rotate(290deg) saturate(10000%)" src="/assets/caret-down-fill.svg" *ngIf="change_color == 'red'">
+        {{change}}
+      </h3>
+      <h6>{{datetime}}</h6>
+    </div>
+  </div>
+</div>
+
+<div class="container" *ngIf="['summary', 'news', 'charts','insights'].includes(tab_if_condition)" style="margin-top: 40px;margin-bottom: 40px;">
+  <div class="row">
+    <div class="col-md-12">
+      <h6 style="color:green; text-align: center;" *ngIf="market_close_time == ''">Market is Open</h6>
+      <h6 style="color:red; text-align: center;" *ngIf="market_close_time != ''">Market Closed on {{market_close_time}}</h6>
+    </div>
+  </div>
+</div>
+
+<div class="container" *ngIf="['summary', 'news', 'charts','insights'].includes(tab_if_condition)" style="margin-bottom:60px;">
+  <div class="row">
+    <button class="btn col-md-3 search_tabs" (click)="selectSummary()" [style.border-bottom]="tab_if_condition=='summary' ? '3px solid blue' : '3px solid lightgray' ">Summary</button>
+    <button class="btn col-md-3 search_tabs" (click)="selectNews()"  [style.border-bottom]="tab_if_condition=='news' ? '3px solid blue' : '3px solid lightgray' ">Top News</button>
+    <button class="btn col-md-3 search_tabs" (click)="selectCharts()"  [style.border-bottom]="tab_if_condition=='charts' ? '3px solid blue' : '3px solid lightgray' ">Charts</button>
+    <button class="btn col-md-3 search_tabs" (click)="selectInsight()"  [style.border-bottom]="tab_if_condition=='insights' ? '3px solid blue' : '3px solid lightgray' ">Insights</button>
+  </div>
+</div>
+
+<div *ngIf="tab_if_condition=='summary'" class="container" style="margin-bottom: 50px;">
+  <div class="row">
+    <div class="col-md-6">
+      <table class="table table-borderless" style="margin-left:80px;">
+        <tr><th style="width: 100px;">High Price:</th><td>{{high}}</td></tr>
+        <tr><th style="width: 100px;">Low Price:</th><td>{{low}}</td></tr>
+        <tr><th style="width: 100px;">Open Price:</th><td>{{open}}</td></tr>
+        <tr><th style="width: 100px;">Prev. Close:</th><td>{{prevclose}}</td></tr>
+      </table>
+      <h5 style="text-align: center;font-weight: bold;text-decoration: underline; margin-top:60px; margin-bottom:30px;">About the Company</h5>
+      <table class="table table-borderless">
+        <tr><td style="padding:10px;"><span style="font-weight: bold;">IPO Start Date: </span>{{ipo}}</td></tr>
+        <tr><td style="padding:10px;"><span style="font-weight: bold;">Industry: </span>{{industry}}</td></tr>
+        <tr><td style="padding:10px;"><span style="font-weight: bold;">Webpage: </span><a class="nav-link" href="{{site}}" style="display: inline;">{{site}}</a></td></tr>
+        <tr><td style="padding:10px;"><span style="font-weight: bold;">Company Peers:</span>
+          <div class="col-sm-6"   style="padding-bottom:30px;">
+            <a *ngFor="let peers of peersList" class="nav-link" href="/search/{{peers}}" style="display: inline; padding: 0px;font-weight: bold;">{{peers}}, </a>
+          </div>
+        </td></tr>
+      </table>
+    </div>
+    <div class="col-md-6">
+      <highcharts-chart
+        [Highcharts]="Highcharts"
+        [options]="chartOptions_summary"
+
+        style="width: 100%; height: 400px; display: block;"
+      ></highcharts-chart>
+
+    </div>
+  </div>
+</div>
+
+<div *ngIf="tab_if_condition=='news'" class="container" style="margin-bottom: 50px;">
+  <div class="row" id="news_container">
+    <div class="col-sm-6" *ngFor="let container of containers"  style="padding-bottom:30px;">
+      <div class="card w-100" style="height:120px;">
+        <div class="row" style="margin-top: 16px;margin-left: 8px;">
+          <img class="card-img-left col-md-4" src="{{container['image']}}" style="max-width: 120px; max-height: 120px; display: inline-block;margin-left: -8px;margin-top: -4px;">
+          <div class="card-body col-md-2" style="display: inline-block;">
+            <p class="card-text" style="display: inline-block;">{{container['headline']}}</p>
+          </div>
+        </div>
+        <button data-bs-toggle="modal" data-bs-target="#newsModal" class="stretched-link" style="background-color:white; border: none;" (click)="updateNewsModal(container['source'], container['datetime'], container['headline'], container['summary'], container['url'] )"></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="tab_if_condition=='charts'" class="container" style="margin-bottom: 50px;">
+  <div class="row" id="chart_container" >
+        <highcharts-chart
+          [Highcharts]="Highcharts"
+          [options]="chartOptions_charts"
+          style="width: 100%; height: 600px; display: block;"
+        ></highcharts-chart>
+  </div>
+</div>
+
+
+<div *ngIf="tab_if_condition=='insights'" class="container" style="margin-bottom: 50px;">
+  <div class="row col-md-12" style="text-align:center; padding-top: 30px; padding-bottom: 30px;">
+    <H3 style="text-align:center; font-weight:bold">Social Sentiments</H3>
+  </div>
+  <div class="row">
+    <table class="table table-borderless" id="soc_sent_table">
+      <tr><th>{{comp_name}}</th><th>Reddit</th><th>Twitter</th></tr>
+      <tr><th>Total Mentions</th><td>{{TOT_REDDIT}}</td><td>{{TOT_TWITTER}}</td></tr>
+      <tr><th>Positive Mentions</th><td>{{P_REDDIT}}</td><td>{{P_TWITTER}}</td></tr>
+      <tr><th>Negative Mentions</th><td>{{N_REDDIT}}</td><td>{{N_TWITTER}}</td></tr>
+    </table>
+  </div>
+  <div class="row">
+    <div class="col-md-6" id="rec_trends_chart">
+      <highcharts-chart
+        [Highcharts]="Highcharts"
+        [options]="chartOptions_recTrends"
+        [(update)]="updateFlag"
+        style="width: 100%; height: 400px; display: block;"
+      ></highcharts-chart>
+    </div>
+    <div class="col-md-6" id="hist_eps_sur_chart">
+      <highcharts-chart
+        [Highcharts]="Highcharts"
+        [options]="chartOptions_EPS"
+        style="width: 100%; height: 400px; display: block;"
+      ></highcharts-chart>
+    </div>
+  </div>
+</div>
+
+<!-- Buy Modal -->
+<div class="modal fade" id="buyModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{tick}}</h5>
+        <button type="button" class="btn close" data-bs-dismiss="modal" aria-label="Close"><img style="width: 20px;margin-right: -20px;margin-top: -30px;" src="/assets/x.svg"></button>
+      </div>
+      <div class="modal-body">
+        <p>Current Price: {{close}}</p>
+        <p>Money in Wallet: ${{money}}</p>
+        <div>Quantity <input type="number" id="buy_quantity" name="quantity" min="0" (change)="updateBuy()" required="required" value="0"></div>
+        <p *ngIf="is_buyable_amt=='high'" style="color: red;">Not enough money in wallet!</p>
+      </div>
+      <div class="modal-footer row">
+        <div class="me-auto col-md-2">Total: {{calculated_total}}</div>
+        <div class="ms-auto col-md-2">
+          <button type="button" [class]="is_buyable_amt=='yes' ? 'btn btn-success' : 'btn btn-success disabled'" data-bs-dismiss="modal" (click)="buyStock() ">Buy</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Sell Modal -->
+<div class="modal fade" id="sellModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{tick}}</h5>
+        <button type="button" class="btn close" data-bs-dismiss="modal" aria-label="Close"><img style="width: 20px;margin-right: -20px;margin-top: -30px;" src="/assets/x.svg"></button>
+      </div>
+      <div class="modal-body">
+        <p>Current Price: {{close}}</p>
+        <p>Money in Wallet: ${{money}}</p>
+        <p>Quantity Owned: {{cur_qty}}</p>
+        <div>Quantity <input type="number" id="sell_quantity" name="quantity" min="0" (change)="updateSell()" required="required" value="0"></div>
+        <p *ngIf="is_sellable_amt=='high'" style="color: red;">You dont own enough shares!</p>
+      </div>
+      <div class="modal-footer row">
+        <div class="me-auto col-md-2">Total: {{calculated_total}}</div>
+        <div class="ms-auto col-md-2">
+          <button type="button" [class]="is_sellable_amt=='yes' ? 'btn btn-danger' : 'btn btn-danger disabled'" data-bs-dismiss="modal" (click)="sellStock() ">Sell</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- News Modal -->
+<div class="modal fade" id="newsModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header" style="background-color:white;">
+        <h4 class="modal-title" style="font-weight: bold;">{{newsmodal_source}}<br>
+          <small style="font-weight:normal;" class="text-muted">{{newsmodal_datetime}}</small></h4>
+        <button type="button" class="btn close" data-bs-dismiss="modal" aria-label="Close"><img style="width: 20px;margin-right: -20px;margin-top: -60px;" src="/assets/x.svg"></button>
+      </div>
+      <div class="modal-body">
+        <h5 style="font-weight: bold;">{{newsmodal_headline}}</h5>
+        <p>{{newsmodal_summary}}
+        <br><span class="text-muted">For more details click <a href="{{newsmodal_url}}" style="text-decoration: none;">here</a>.</span>
+        </p>
+      </div>
+      <div class="modal-footer row" style="justify-content: left;">
+        <p>Share</p>
+        <button type="button" class="btn search_button"><a target="_blank" href="https://twitter.com/intent/tweet?text={{newsmodal_headline}}%0A{{newsmodal_url}}"><img style="width:40px; filter: invert() sepia(100%) saturate(100%) hue-rotate(160deg) saturate(10000%) brightness(.7)" src="/assets/twitter-brands.svg"></a></button>
+        <div class="fb-share-button" style="width:30px"
+               [attr.data-href]="newsmodal_url"
+               data-layout="button">
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<mat-autocomplete #auto="matAutocomplete" (optionSelected)="onSearch()">
+  <mat-option *ngFor="let option of options" [value]="option[0]" style="color:black; background-color:white">
+    {{option[0]}}<small style="color:grey; font-size:12px"> | {{option[1]}}</small>
+  </mat-option>
+</mat-autocomplete>

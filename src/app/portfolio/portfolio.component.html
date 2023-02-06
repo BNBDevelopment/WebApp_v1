@@ -1,0 +1,109 @@
+<div class="container">
+  <h1 style="padding-top: 50px;padding-bottom: 20px; margin-top: 60px;">My Portfolio</h1>
+  <h4 style="margin-bottom: 20px;">Money in Wallet: ${{money}}</h4>
+</div>
+
+<div class="container">
+  <div [class]="soldorbought==' bought ' ? 'alert alert-success' : 'alert alert-danger'" role="alert" *ngIf="notification_present==true">
+    {{ticker}} {{soldorbought}} sucessfully!
+    <button type="clear" class="btn search_button" (click)="this.notification_present = false;" style="float:right;margin-top: -10px;">
+      <img style="width:30px; float:right; filter: invert() brightness(.5)" src="/assets/x.svg">
+    </button>
+  </div>
+</div>
+
+<div >
+  <div class="container" *ngIf="display_error==true" style="text-align: center">
+    <div class="alert alert-warning">Currently you dont have any stock.</div>
+  </div>
+  <div class="container" *ngIf="display_error==false">
+    <div *ngFor="let container of pf_container" style="padding-bottom:30px; font-size: 18px;">
+      <div class="card">
+        <div class="card-header row">
+          <h3 class="col-md-auto">{{container['ticker']}}</h3>
+          <h5 class="col-md-auto" style="color:grey">{{container['compName']}}</h5>
+        </div>
+        <div class="row" style="line-height: 30px;">
+          <div class="col-sm-3" style="text-align:left;padding-left: 30px;">
+            <span>Quantity:</span><br>
+            <span>Avg. Cost / Share:</span><br>
+            <span>Total Cost:</span><br>
+          </div>
+          <div class="col-sm-3" style="text-align:right;">
+            <span>{{container['quantity_owned']}}</span><br>
+            <span>{{container['avg_cost_share']}}</span><br>
+            <span>{{container['total_cost']}}</span><br>
+          </div>
+          <div class="col-sm-3" style="text-align:left">
+            <span>Change:</span><br>
+            <span>Current Price:</span><br>
+            <span>Market Value:</span><br>
+          </div>
+          <div class="col-sm-3" style="color:{{container['color']}}; text-align:right; padding-right: 30px;">
+            <span>
+              <img style="width:15px; filter: invert() sepia(100%) saturate(10000%) hue-rotate(45deg) saturate(10000%) brightness(.5)" src="/assets/caret-up-fill.svg" *ngIf="container['color'] == 'green'">
+              <img style="width:15px; filter: invert() sepia(100%) saturate(10000%) hue-rotate(290deg) saturate(10000%)" src="/assets/caret-down-fill.svg" *ngIf="container['color'] == 'red'">
+              {{container['change']}}
+            </span><br>
+            <span>{{container['cur_price']}}</span><br>
+            <span>{{container['mkt_val']}}</span><br>
+          </div>
+        </div>
+        <div class="card-footer">
+          <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#sellModal" style="margin-left:10px; float: right;" (click)="updateSell(container['ticker'],container['cur_price'])">Sell</button>
+          <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#buyModal" style="float: right;" (click)="updateBuy(container['ticker'],container['cur_price'])">Buy</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Buy Modal -->
+<div class="modal fade" id="buyModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{ticker}}</h5>
+        <button type="button" class="btn close" data-bs-dismiss="modal" aria-label="Close"><img style="width: 20px;margin-right: -20px;margin-top: -30px;" src="/assets/x.svg"></button>
+      </div>
+      <div class="modal-body">
+        <p>Current Price: {{close}}</p>
+        <p>Money in Wallet: ${{money}}</p>
+        <div>Quantity <input type="number" id="buy_quantity" name="quantity" min="0" (change)="updateBuy(ticker, close)" required="required" value="0"></div>
+        <p *ngIf="is_buyable_amt=='high'" style="color: red;">Not enough money in wallet!</p>
+      </div>
+      <div class="modal-footer row">
+        <div class="me-auto col-md-2">Total: {{calculated_total}}</div>
+        <div class="ms-auto col-md-2">
+          <button type="button" [class]="is_buyable_amt=='yes' ? 'btn btn-success' : 'btn btn-success disabled'" data-bs-dismiss="modal" (click)="buyStock() ">Buy</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Sell Modal -->
+<div class="modal fade" id="sellModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{ticker}}</h5>
+        <button type="button" class="btn close" data-bs-dismiss="modal" aria-label="Close"><img style="width: 20px;margin-right: -20px;margin-top: -30px;" src="/assets/x.svg"></button>
+      </div>
+      <div class="modal-body">
+        <p>Current Price: {{close}}</p>
+        <p>Money in Wallet: ${{money}}</p>
+        <p>Quantity Owned: {{cur_qty}}</p>
+        <div>Quantity <input type="number" id="sell_quantity" name="quantity" min="0" (change)="updateSell(ticker, close)" required="required" value="0"></div>
+        <p *ngIf="is_sellable_amt=='high'" style="color: red;">You dont own enough shares!</p>
+      </div>
+      <div class="modal-footer row">
+        <div class="me-auto col-md-2">Total: {{calculated_total}}</div>
+        <div class="ms-auto col-md-2">
+          <button type="button" [class]="is_sellable_amt=='yes' ? 'btn btn-danger' : 'btn btn-danger disabled'" data-bs-dismiss="modal" (click)="sellStock() ">Sell</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

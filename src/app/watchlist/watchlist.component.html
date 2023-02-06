@@ -1,0 +1,30 @@
+<div >
+  <div class="container">
+    <h1 style="padding-top: 50px;padding-bottom: 20px;margin-bottom: 20px; margin-top: 60px;">My Watchlist</h1>
+  </div>
+  <div class="container" *ngIf="display_error==true" style="text-align: center">
+    <div class="alert alert-warning">Currently you dont have any stock in your watchlist.</div>
+  </div>
+  <div class="container" *ngIf="display_error==false">
+    <div *ngFor="let container of wl_container"  style="padding-bottom:30px;">
+      <div class="card position-relative" style="padding-top:14px; padding-bottom:14px;">
+        <img class="text-right position-absolute top-0 end-0" src="/assets/x.svg" style="height:20px;padding:0px; z-index:9999" (click)="removeWatchItem($event, container['ticker'])">
+        <div class="row">
+          <div class="col-sm-6" style="text-align:left">
+            <h3 class="card-title" style="margin-left: 30px;">{{container['ticker']}}</h3>
+            <p class="card-text" style="margin-left: 30px;">{{container['compName']}}</p>
+          </div>
+          <div class="col-sm-6" style="text-align:right">
+            <h3 class="card-title" style="color:{{container['color']}}; margin-right: 30px;">{{container['close']}}</h3>
+            <p class="card-text" style="color:{{container['color']}}; margin-right: 30px;">
+              <img style="width:15px; filter: invert() sepia(100%) saturate(10000%) hue-rotate(45deg) saturate(10000%) brightness(.5)" src="/assets/caret-up-fill.svg" *ngIf="container['color'] == 'green'">
+              <img style="width:15px; filter: invert() sepia(100%) saturate(10000%) hue-rotate(290deg) saturate(10000%)" src="/assets/caret-down-fill.svg" *ngIf="container['color'] == 'red'">
+              {{container['change']}}
+            </p>
+          </div>
+        </div>
+        <a href="/search/{{container['ticker']}}" class="stretched-link"></a>
+      </div>
+    </div>
+  </div>
+</div>

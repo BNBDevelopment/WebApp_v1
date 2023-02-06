@@ -1,0 +1,25 @@
+/* You can add global styles to this file, and also import other style files */
+.parent {
+  background-image:url('http://canop.org/blog/wp-content/uploads/2011/11/cropped-bandeau-cr%C3%AAte-011.jpg');
+
+}
+
+body{
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.opq_bg_image {
+  z-index: -1;
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  filter: opacity(30%);
+  width: 100%;
+  min-height: 100%;
+  background-position: center;
+  background-image: url('/assets/background-graph.jpg');
+  background-attachment: fixed;
+}
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
